@@ -1,0 +1,208 @@
+---
+defaultBaseImageVersion: latest
+properties:
+- name: IBMCLOUD_TARGET_REGION
+  value: ${BUILD_REGION_ID}
+  type: text
+- name: IBMCLOUD_TARGET_RESOURCE_GROUP
+  value: ${BUILD_RESOURCE_GROUP}
+  type: text
+- name: IBM_CLOUD_API_KEY
+  value: ${API_KEY}
+  type: secure
+- name: VAULT_INSTANCE
+  value: ${VAULT_INSTANCE}
+  type: text
+stages:
+- name: Create Build Signer Key
+  triggers:
+  - type: stage
+    enabled: true
+  properties:
+  - name: REGISTRY_REGION
+    value: ${REGISTRY_REGION_ID}
+    type: text
+  - name: REGISTRY_NAMESPACE
+    value: ${REGISTRY_NAMESPACE}
+    type: text
+  - name: DEVOPS_BUILD_SIGNER
+    value: ${BUILD_SIGNER}
+    type: text
+  - name: DEVOPS_VALIDATION_SIGNER
+    value: ${VALIDATION_SIGNER}
+    type: text
+  jobs:
+  - name: Create Build Signer Key
+    type: builder
+    curatedDockerImage: default
+    build_type: customimage
+    docker_image: jauninb/pbi-docker:latest
+    script: |
+      #!/bin/bash
+
+      # Restore root & repository keys
+      if [ -z "$VAULT_INSTANCE" ]; then
+        echo "No op"
+      else
+        export IBMCLOUD_API_KEY=$IBM_CLOUD_API_KEY
+        export IBMCLOUD_TARGET_REGION=${IBMCLOUD_TARGET_REGION:-"eu-gb"}
+
+        # if target region is in the 'ibm:yp:<region>' just keep the region part
+        REGION_SUBSET=$(echo "$IBMCLOUD_TARGET_REGION" | awk -F ':' '{print $3;}')
+        if [[ -z "$REGION_SUBSET" ]]; then
+          echo "IBM Cloud Target Region is $IBMCLOUD_TARGET_REGION"
+        else
+          export IBMCLOUD_TARGET_REGION=$REGION_SUBSET
+          echo "IBM Cloud Target Region is $IBMCLOUD_TARGET_REGION. export IBMCLOUD_TARGET_REGION=$REGION_SUBSET done"
+        fi
+
+        ibmcloud login --apikey "$IBM_CLOUD_API_KEY" -r "$IBMCLOUD_TARGET_REGION"
+        
+        DEVOPS_SIGNER="$DEVOPS_BUILD_SIGNER"
+        source <(curl -sSL "https://raw.githubusercontent.com/huayuenh/jumpstart/master/signatures.sh")
+        source <(curl -sSL "https://raw.githubusercontent.com/huayuenh/jumpstart/master/create_signer.sh")
+      fi
+- name: Create Validation Signer Key
+  triggers:
+  - type: stage
+    enabled: true
+  properties:
+  - name: REGISTRY_REGION
+    value: ${REGISTRY_REGION_ID}
+    type: text
+  - name: REGISTRY_NAMESPACE
+    value: ${REGISTRY_NAMESPACE}
+    type: text
+  - name: DEVOPS_BUILD_SIGNER
+    value: ${BUILD_SIGNER}
+    type: text
+  - name: DEVOPS_VALIDATION_SIGNER
+    value: ${VALIDATION_SIGNER}
+    type: text
+  jobs:
+  - name: Create Validation Signer Key
+    type: builder
+    curatedDockerImage: default
+    build_type: customimage
+    docker_image: jauninb/pbi-docker:latest
+    script: |
+      #!/bin/bash
+      
+      # Restore  keys
+      if [ -z "$VAULT_INSTANCE" ]; then
+        echo "No op"
+      else
+        export IBMCLOUD_API_KEY=$IBM_CLOUD_API_KEY
+        export IBMCLOUD_TARGET_REGION=${IBMCLOUD_TARGET_REGION:-"eu-gb"}
+
+        # if target region is in the 'ibm:yp:<region>' just keep the region part
+        REGION_SUBSET=$(echo "$IBMCLOUD_TARGET_REGION" | awk -F ':' '{print $3;}')
+        if [[ -z "$REGION_SUBSET" ]]; then
+          echo "IBM Cloud Target Region is $IBMCLOUD_TARGET_REGION"
+        else
+          export IBMCLOUD_TARGET_REGION=$REGION_SUBSET
+          echo "IBM Cloud Target Region is $IBMCLOUD_TARGET_REGION. export IBMCLOUD_TARGET_REGION=$REGION_SUBSET done"
+        fi
+
+        ibmcloud login --apikey "$IBM_CLOUD_API_KEY" -r "$IBMCLOUD_TARGET_REGION"
+
+        DEVOPS_SIGNER="$DEVOPS_VALIDATION_SIGNER"
+        source <(curl -sSL "https://raw.githubusercontent.com/huayuenh/jumpstart/master/signatures.sh")
+        source <(curl -sSL "https://raw.githubusercontent.com/huayuenh/jumpstart/master/create_signer.sh")
+      fi
+- name: Delete Build Signer Key
+  triggers:
+  - type: stage
+    enabled: false
+  properties:
+  - name: REGISTRY_REGION
+    value: ${REGISTRY_REGION_ID}
+    type: text
+  - name: REGISTRY_NAMESPACE
+    value: ${REGISTRY_NAMESPACE}
+    type: text
+  - name: DEVOPS_BUILD_SIGNER
+    value: ${BUILD_SIGNER}
+    type: text
+  - name: DEVOPS_VALIDATION_SIGNER
+    value: ${VALIDATION_SIGNER}
+    type: text
+  jobs:
+  - name: Delete Build Signer Key
+    type: builder
+    curatedDockerImage: default
+    build_type: customimage
+    docker_image: jauninb/pbi-docker:latest
+    script: |
+      #!/bin/bash
+
+      # Restore root & repository keys
+      if [ -z "$VAULT_INSTANCE" ]; then
+        echo "No op"
+      else
+        export IBMCLOUD_API_KEY=$IBM_CLOUD_API_KEY
+        export IBMCLOUD_TARGET_REGION=${IBMCLOUD_TARGET_REGION:-"eu-gb"}
+
+        # if target region is in the 'ibm:yp:<region>' just keep the region part
+        REGION_SUBSET=$(echo "$IBMCLOUD_TARGET_REGION" | awk -F ':' '{print $3;}')
+        if [[ -z "$REGION_SUBSET" ]]; then
+          echo "IBM Cloud Target Region is $IBMCLOUD_TARGET_REGION"
+        else
+          export IBMCLOUD_TARGET_REGION=$REGION_SUBSET
+          echo "IBM Cloud Target Region is $IBMCLOUD_TARGET_REGION. export IBMCLOUD_TARGET_REGION=$REGION_SUBSET done"
+        fi
+
+        ibmcloud login --apikey "$IBM_CLOUD_API_KEY" -r "$IBMCLOUD_TARGET_REGION"
+        
+        DEVOPS_SIGNER="$DEVOPS_BUILD_SIGNER"
+        source <(curl -sSL "https://raw.githubusercontent.com/huayuenh/jumpstart/master/signatures.sh")
+        source <(curl -sSL "https://raw.githubusercontent.com/huayuenh/jumpstart/master/delete_signer_key.sh")
+      fi
+- name: Delete Validation Signer Key
+  triggers:
+  - type: stage
+    enabled: false
+  properties:
+  - name: REGISTRY_REGION
+    value: ${REGISTRY_REGION_ID}
+    type: text
+  - name: REGISTRY_NAMESPACE
+    value: ${REGISTRY_NAMESPACE}
+    type: text
+  - name: DEVOPS_BUILD_SIGNER
+    value: ${BUILD_SIGNER}
+    type: text
+  - name: DEVOPS_VALIDATION_SIGNER
+    value: ${VALIDATION_SIGNER}
+    type: text
+  jobs:
+  - name: Delete Validation Signer Key
+    type: builder
+    curatedDockerImage: default
+    build_type: customimage
+    docker_image: jauninb/pbi-docker:latest
+    script: |
+      #!/bin/bash
+      
+      # Restore  keys
+      if [ -z "$VAULT_INSTANCE" ]; then
+        echo "No op"
+      else
+        export IBMCLOUD_API_KEY=$IBM_CLOUD_API_KEY
+        export IBMCLOUD_TARGET_REGION=${IBMCLOUD_TARGET_REGION:-"eu-gb"}
+
+        # if target region is in the 'ibm:yp:<region>' just keep the region part
+        REGION_SUBSET=$(echo "$IBMCLOUD_TARGET_REGION" | awk -F ':' '{print $3;}')
+        if [[ -z "$REGION_SUBSET" ]]; then
+          echo "IBM Cloud Target Region is $IBMCLOUD_TARGET_REGION"
+        else
+          export IBMCLOUD_TARGET_REGION=$REGION_SUBSET
+          echo "IBM Cloud Target Region is $IBMCLOUD_TARGET_REGION. export IBMCLOUD_TARGET_REGION=$REGION_SUBSET done"
+        fi
+
+        ibmcloud login --apikey "$IBM_CLOUD_API_KEY" -r "$IBMCLOUD_TARGET_REGION"
+
+        DEVOPS_SIGNER="$DEVOPS_VALIDATION_SIGNER"
+        source <(curl -sSL "https://raw.githubusercontent.com/huayuenh/jumpstart/master/signatures.sh")
+        source <(curl -sSL "https://raw.githubusercontent.com/huayuenh/jumpstart/master/delete_signer_key.sh")
+      fi

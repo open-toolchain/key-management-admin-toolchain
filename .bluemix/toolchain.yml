@@ -1,0 +1,52 @@
+version: '2'
+messages:
+  $i18n: locales.yml
+template:
+  name:
+    $ref: "#/messages/template.name"
+  description:
+    $ref: "#/messages/template.description"
+  header: '![](toolchain.svg?localize)'
+  icon: secure-lock-kubernetes.svg
+  required:
+    - build
+    - repo
+  info:
+    git url: >
+      "[" + $env.repository + "]" +
+        "(" + $env.repository + ")"
+    git branch: >
+      "[" + $env.branch + "]" +
+        "(" + $env.repository +
+          "/tree/" + $env.branch + ")"
+toolchain:
+  name: 'key-setup-{{timestamp}}'
+services:
+  build:
+    service_id: pipeline
+    parameters:
+      name: '{{services.repo.parameters.repo_name}}'
+      ui-pipeline: true
+      configuration:
+        content:
+          $text: manage_keys.yml
+        env:
+          APP_NAME: '{{form.pipeline.parameters.app-name}}'
+          API_KEY: '{{form.pipeline.parameters.api-key}}'
+          BUILD_REGION_ID: '{{form.pipeline.parameters.prod-region}}'
+          BUILD_RESOURCE_GROUP: '{{form.pipeline.parameters.prod-resource-group}}'
+          VAULT_INSTANCE: '{{form.pipeline.parameters.vault_name}}'
+          BUILD_SIGNER: '{{form.pipeline.parameters.build_signer}}'
+          VALIDATION_SIGNER: '{{form.pipeline.parameters.validation_signer}}'
+          REGISTRY_NAMESPACE: '{{form.pipeline.parameters.registry-namespace}}'
+        execute: false
+form:
+  pipeline:
+    parameters:
+      app-name: '{{toolchain.name}}'
+      vault_name: ''
+      build_signer: 'devops-build'
+      validation_signer: 'devops-validation'
+    schema:
+      $ref: deploy.json
+

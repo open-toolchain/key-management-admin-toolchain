@@ -1,0 +1,215 @@
+{
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "messages": {
+        "$i18n": "locales.yml"
+    },
+    "title": {
+        "$ref": "#/messages/deploy.title"
+    },
+    "description": {
+        "$ref": "#/messages/deploy.description"
+    },
+    "longDescription": {
+        "$ref": "#/messages/deploy.longDescription"
+    },
+    "type": "object",
+    "properties": {
+        "api-key": {
+            "description": {
+                "$ref": "#/messages/deploy.apikeyDescription"
+            },
+            "type": "string",
+            "pattern": "\\S",
+            "validator": {
+                "v-type": "api-key"
+            }
+        },
+        "registry-region": {
+            "description": {
+                "$ref": "#/messages/deploy.registryRegionDescription"
+            },
+            "type": "string",
+            "disabled": false,
+            "validator": {
+                "v-type": "k8s-region",
+                "params": [
+                    "api-key"
+                ]
+            }
+        },
+        "registry-namespace": {
+            "description": {
+                "$ref": "#/messages/deploy.registrynsDescription"
+            },
+            "type": "string",
+            "pattern": "^[a-z0-9][-_a-z0-9]{2,28}[a-z0-9]$",
+            "validator": {
+                "v-type": "k8s-registry-namespace",
+                "params": [
+                    "registry-region"
+                ],
+                "validate": false
+            }
+        },
+        "prod-region": {
+            "description": {
+                "$ref": "#/messages/deploy.regionDescription"
+            },
+            "type": "string",
+            "disabled": false,
+            "validator": {
+                "v-type": "k8s-region",
+                "params": [
+                    "api-key"
+                ]
+            }
+        },
+        "prod-resource-group": {
+            "description": {
+                "$ref": "#/messages/deploy.rgDescription"
+            },
+            "type": "string",
+            "validator": {
+                "v-type": "resource-group",
+                "params": [
+                    "api-key"
+                ]
+            }
+        },
+        "app-name": {
+            "description": {
+                "$ref": "#/messages/deploy.appDescription"
+            },
+            "type": "string",
+            "pattern": "\\S"
+        },
+        "signer": {
+            "description": "Name of the image signer (signing key-pair's name)",
+            "type": "string",
+            "pattern": "\\S"
+        }
+    },
+    "required": [
+        "app-name",
+        "api-key",
+        "prod-region",
+        "prod-resource-group",
+        "registry-namespace",
+        "vault_name"
+    ],
+    "form": [
+        {
+            "type": "validator",
+            "url": "/devops/validator/validator-v1.html"
+        },
+        {
+            "type": "text",
+            "readonly": false,
+            "title": {
+                "$ref": "#/messages/deploy.appName"
+            },
+            "key": "app-name"
+        },
+        {
+            "type": "password",
+            "readonly": false,
+            "title": {
+                "$ref": "#/messages/deploy.apikey"
+            },
+            "key": "api-key"
+        },
+        {
+            "type": "table",
+            "columnCount": 3,
+            "widths": [
+                "50%",
+                "3%",
+                "47%"
+            ],
+            "items": [
+                {
+                    "type": "label",
+                    "title": {
+                        "$ref": "#/messages/deploy.containerregRegion"
+                    }
+                },
+                {
+                    "type": "label",
+                    "title": ""
+                },
+                {
+                    "type": "label",
+                    "title": {
+                        "$ref": "#/messages/deploy.containerregns"
+                    }
+                },
+                {
+                    "type": "select",
+                    "title": {
+                        "$ref": "#/messages/deploy.imgregRegion"
+                    },
+                    "key": "registry-region"
+                },
+                {
+                    "type": "label",
+                    "title": ""
+                },
+                {
+                    "type": "select",
+                    "readonly": false,
+                    "title": {
+                        "$ref": "#/messages/deploy.imgregNs"
+                    },
+                    "key": "registry-namespace"
+                },
+                {
+                    "type": "label",
+                    "title": {
+                        "$ref": "#/messages/region"
+                    }
+                },
+                {
+                    "type": "label",
+                    "title": ""
+                },
+                {
+                    "type": "label",
+                    "title": {
+                        "$ref": "#/messages/deploy.rg"
+                    }
+                },
+                {
+                    "type": "select",
+                    "key": "prod-region"
+                },
+                {
+                    "type": "label",
+                    "title": ""
+                },
+                {
+                    "type": "select",
+                    "key": "prod-resource-group",
+                    "readonly": false
+                }
+            ]
+        },
+        {
+            "type": "text",
+            "readonly": false,
+            "title": "Key Protect Vault Instance name",
+            "key": "vault_name"
+        },
+        {
+            "type": "text",
+            "readonly": false,
+            "title": "DevOps Docker Image Build signer",
+            "key": "build_signer"
+        },
+        {
+            "type": "text",
+            "readonly": false,
+            "title": "DevOps Docker Image Validation signer",
+            "key": "validation_signer"
+        }
+    ]
+}
