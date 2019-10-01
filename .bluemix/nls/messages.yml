@@ -1,7 +1,7 @@
 ---
 #The format for creating a link with a URL and text is [link text](link url) with no spaces or characters between the two sets of brackets- []()
 template.name: "Create delegate keys for Image Signing"
-template.description: "With this template you can create public/private key pairs to be consumed by an Image Signing template See https://github.com/open-toolchain/image-signed-secure-kube-toolchain. The key pairs are stored in a Key Protect vault instance, either using an existing instance or one created by the template."
+template.description: "With this template you can create public/private key pairs to be consumed by an [Image Signing template](https://github.com/open-toolchain/image-signed-secure-kube-toolchain). The key pairs are stored in a Key Protect vault instance, either using an existing instance or one created by the template."
 deploy.title: "Create public/private key pairs for image signing "
 deploy.description: "hello-world simple toolchain"
 deploy.longDescription: "This template allows you to manage public/private keys for consumption by an image signing template"
