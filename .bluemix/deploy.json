@@ -97,7 +97,9 @@
         "prod-region",
         "prod-resource-group",
         "registry-namespace",
-        "vault_name"
+        "vault_name",
+        "build_signer",
+        "validation_signer"
     ],
     "form": [
         {
