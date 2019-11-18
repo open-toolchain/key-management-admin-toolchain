@@ -83,8 +83,10 @@
             "type": "string",
             "pattern": "\\S"
         },
-        "signer": {
-            "description": "Name of the image signer (signing key-pair's name)",
+        "vault_name": {
+            "description": {
+                "$ref": "#/messages/deploy.keyDetails"
+            },
             "type": "string",
             "pattern": "\\S"
         }
@@ -196,19 +198,25 @@
         {
             "type": "text",
             "readonly": false,
-            "title": "Key Protect Vault Instance name",
+            "title": {
+                "$ref": "#/messages/deploy.vaultName"
+            },
             "key": "vault_name"
         },
         {
             "type": "text",
             "readonly": false,
-            "title": "DevOps Docker Image Build signer",
+            "title": {
+                "$ref": "#/messages/deploy.buildSigner"
+            },
             "key": "build_signer"
         },
         {
             "type": "text",
             "readonly": false,
-            "title": "DevOps Docker Image Validation signer",
+            "title": {
+                "$ref": "#/messages/deploy.validationSigner"
+            },
             "key": "validation_signer"
         }
     ]
