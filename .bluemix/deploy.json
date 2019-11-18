@@ -89,13 +89,6 @@
             },
             "type": "string",
             "pattern": "\\S"
-        },
-        "build_signer": {
-            "description": {
-                "$ref": "#/messages/deploy.keyDetails"
-            },
-            "type": "string",
-            "pattern": "\\S"
         }
     },
     "required": [
