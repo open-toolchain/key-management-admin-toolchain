@@ -59,8 +59,8 @@ stages:
         ibmcloud login --apikey "$IBM_CLOUD_API_KEY" -r "$IBMCLOUD_TARGET_REGION"
         
         DEVOPS_SIGNER="$DEVOPS_BUILD_SIGNER"
-        source <(curl -sSL "https://raw.githubusercontent.com/huayuenh/jumpstart/master/signatures.sh")
-        source <(curl -sSL "https://raw.githubusercontent.com/huayuenh/jumpstart/master/create_signer.sh")
+        source <(curl -sSL "https://raw.githubusercontent.com/open-toolchain/commons/master/scripts/image_signing/signing_utils.sh")
+        source <(curl -sSL "https://raw.githubusercontent.com/open-toolchain/commons/master/scripts/image_signing/create_signer.sh")
       fi
 - name: Create Validation Signer Key
   triggers:
@@ -107,8 +107,8 @@ stages:
         ibmcloud login --apikey "$IBM_CLOUD_API_KEY" -r "$IBMCLOUD_TARGET_REGION"
 
         DEVOPS_SIGNER="$DEVOPS_VALIDATION_SIGNER"
-        source <(curl -sSL "https://raw.githubusercontent.com/huayuenh/jumpstart/master/signatures.sh")
-        source <(curl -sSL "https://raw.githubusercontent.com/huayuenh/jumpstart/master/create_signer.sh")
+        source <(curl -sSL "https://raw.githubusercontent.com/open-toolchain/commons/master/scripts/image_signing/signing_utils.sh")
+        source <(curl -sSL "https://raw.githubusercontent.com/open-toolchain/commons/master/scripts/image_signing/create_signer.sh")
       fi
 - name: Delete Build Signer Key
   triggers:
@@ -155,8 +155,8 @@ stages:
         ibmcloud login --apikey "$IBM_CLOUD_API_KEY" -r "$IBMCLOUD_TARGET_REGION"
         
         DEVOPS_SIGNER="$DEVOPS_BUILD_SIGNER"
-        source <(curl -sSL "https://raw.githubusercontent.com/huayuenh/jumpstart/master/signatures.sh")
-        source <(curl -sSL "https://raw.githubusercontent.com/huayuenh/jumpstart/master/delete_signer_key.sh")
+        source <(curl -sSL "https://raw.githubusercontent.com/open-toolchain/commons/master/scripts/image_signing/signing_utils.sh")
+        source <(curl -sSL "https://raw.githubusercontent.com/open-toolchain/commons/master/scripts/image_signing/delete_signer_key.sh")
       fi
 - name: Delete Validation Signer Key
   triggers:
@@ -203,6 +203,6 @@ stages:
         ibmcloud login --apikey "$IBM_CLOUD_API_KEY" -r "$IBMCLOUD_TARGET_REGION"
 
         DEVOPS_SIGNER="$DEVOPS_VALIDATION_SIGNER"
-        source <(curl -sSL "https://raw.githubusercontent.com/huayuenh/jumpstart/master/signatures.sh")
-        source <(curl -sSL "https://raw.githubusercontent.com/huayuenh/jumpstart/master/delete_signer_key.sh")
+        source <(curl -sSL "https://raw.githubusercontent.com/open-toolchain/commons/master/scripts/image_signing/signing_utils.sh")
+        source <(curl -sSL "https://raw.githubusercontent.com/open-toolchain/commons/master/scripts/image_signing/delete_signer_key.sh")
       fi
