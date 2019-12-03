@@ -36,10 +36,10 @@ stages:
     type: builder
     curatedDockerImage: default
     build_type: customimage
-    docker_image: jauninb/pbi-docker:latest
+    docker_image: ibmcom/pipeline-base-image:latest
     script: |
       #!/bin/bash
-
+      source <(curl -sSL "https://raw.githubusercontent.com/open-toolchain/commons/master/scripts/image_signing/add_docker.sh")
       # Restore root & repository keys
       if [ -z "$VAULT_INSTANCE" ]; then
         echo "No op"
@@ -84,10 +84,10 @@ stages:
     type: builder
     curatedDockerImage: default
     build_type: customimage
-    docker_image: jauninb/pbi-docker:latest
+    docker_image: ibmcom/pipeline-base-image:latest
     script: |
       #!/bin/bash
-      
+      source <(curl -sSL "https://raw.githubusercontent.com/open-toolchain/commons/master/scripts/image_signing/add_docker.sh")
       # Restore  keys
       if [ -z "$VAULT_INSTANCE" ]; then
         echo "No op"
@@ -131,8 +131,6 @@ stages:
   - name: Delete Build Signer Key
     type: builder
     curatedDockerImage: default
-    build_type: customimage
-    docker_image: jauninb/pbi-docker:latest
     script: |
       #!/bin/bash
 
@@ -179,8 +177,6 @@ stages:
   - name: Delete Validation Signer Key
     type: builder
     curatedDockerImage: default
-    build_type: customimage
-    docker_image: jauninb/pbi-docker:latest
     script: |
       #!/bin/bash
       
