@@ -6,10 +6,12 @@ template:
     $ref: "#/messages/template.name"
   description:
     $ref: "#/messages/template.description"
+  header: '![](toolchain.svg?localize)'
   icon: secure-lock-kubernetes.svg
   required:
     - build
-    - repo
+    - app-repo
+    - tekton-catalog-repo
   info:
     git url: >
       "[" + $env.repository + "]" +
@@ -19,33 +21,72 @@ template:
         "(" + $env.repository +
           "/tree/" + $env.branch + ")"
 toolchain:
-  name: 'key-setup-{{timestamp}}'
+  name: 'key-management-admin-toolchain-{{timestamp}}'
+  template:
+    getting_started:
+      $ref: "#/messages/template.gettingStarted"
 services:
+  app-repo:
+    service_id: >
+      $env.source_provider ? $env.source_provider : 'githubconsolidated'
+    parameters:
+      repo_name: 'key-management-admin-toolchain-{{timestamp}}'
+      repo_url: >
+        $env.type === 'link' ?
+          $env.app_repo : 'https://github.com/open-toolchain/key-management-admin-toolchain'
+      source_repo_url: >
+        $env.type === 'fork' || $env.type === 'clone' ?
+          $env.app_repo : 'https://github.com/open-toolchain/key-management-admin-toolchain'
+      type: $env.type || 'link'
+      has_issues: false
+      enable_traceability: false
+      legal: true
+  tekton-catalog-repo:
+    service_id: >
+      $env.source_provider ? $env.source_provider : 'githubconsolidated'
+    parameters:
+      repo_name: 'common-tekton-tasks-{{timestamp}}'
+      repo_url: >
+        $env.type === 'link' ?
+          $env.app_repo : 'https://github.com/open-toolchain/tekton-catalog'
+      source_repo_url: >
+        $env.type === 'fork' || $env.type === 'clone' ?
+          $env.app_repo : 'https://github.com/open-toolchain/tekton-catalog'
+      type: $env.type || 'link'
+      has_issues: false
+      enable_traceability: false
+      legal: true
   build:
     service_id: pipeline
     parameters:
-      name: '{{services.repo.parameters.repo_name}}'
+      services:
+        - app-repo
+      name: '{{services.app-repo.parameters.repo_name}}'
       ui-pipeline: true
+      type: tekton
       configuration:
         content:
-          $text: manage_keys.yml
+          $text: pipeline_tekton.yml
         env:
+          APP_REPO: app-repo
           APP_NAME: '{{form.pipeline.parameters.app-name}}'
+          REGISTRY_REGION_ID: '{{form.pipeline.parameters.registry-region}}'
+          REGISTRY_NAMESPACE: '{{form.pipeline.parameters.registry-namespace}}'
           API_KEY: '{{form.pipeline.parameters.api-key}}'
-          BUILD_REGION_ID: '{{form.pipeline.parameters.prod-region}}'
-          BUILD_RESOURCE_GROUP: '{{form.pipeline.parameters.prod-resource-group}}'
+          DEV_REGION_ID: '{{form.pipeline.parameters.dev-region}}'
+          DEV_RESOURCE_GROUP: '{{form.pipeline.parameters.dev-resource-group}}'
           VAULT_INSTANCE: '{{form.pipeline.parameters.vault_name}}'
           BUILD_SIGNER: '{{form.pipeline.parameters.build_signer}}'
           VALIDATION_SIGNER: '{{form.pipeline.parameters.validation_signer}}'
-          REGISTRY_NAMESPACE: '{{form.pipeline.parameters.registry-namespace}}'
+          TEKTON_CATALOG_REPO: tekton-catalog-repo
+          APP_REPO_FULL: 'https://github.com/huayuenh/test_key'
         execute: false
 form:
   pipeline:
     parameters:
-      app-name: '{{toolchain.name}}'
+      app-name: '{{services.app-repo.parameters.repo_name}}'
       vault_name: ''
       build_signer: 'devops-build'
       validation_signer: 'devops-validation'
     schema:
       $ref: deploy.json
-

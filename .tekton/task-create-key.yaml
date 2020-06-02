@@ -1,0 +1,76 @@
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: create-key-task
+spec:
+  params:
+    - name: repository
+      description: the git repo
+    - name: revision
+      description: the revision
+      default: master
+    - name: api-key
+      description: the ibmcloud api key
+    - name: api
+      description: the ibmcloud api endpoint
+      default: "https://cloud.ibm.com"
+    - name: region
+      description: the ibmcloud registry region
+    - name: vault-name
+      description: The name of the Key Protect instance
+    - name: validation-signer
+      description: The validation signer
+    - name: resource-group
+      description: The resource group
+    - name: registry-namespace
+      description: the registry namespace
+    - name: mount-path
+      description: mount path directory 
+      default: /artifacts
+    - name: volume
+      description: volume mount name
+      default: task-volume
+  workspaces:
+    - name: artifacts
+      description: A workspace backing by a volume where the files (Dockerfile etc..) are expected to be
+      mountPath: /artifacts
+  steps:
+    - name: create-key
+      image: ibmcom/pipeline-base-image
+      env:
+        - name: IBMCLOUD_API_KEY
+          value: $(params.api-key)
+        - name: API
+          value: $(params.api)
+        - name: REGION
+          value: $(params.region)
+        - name: HOME
+          value: "/root"
+        - name: VAULT_INSTANCE
+          value: $(params.vault-name)
+        - name: DEVOPS_VALIDATION_SIGNER
+          value: $(params.validation-signer)
+        - name: IBMCLOUD_TARGET_RESOURCE_GROUP
+          value: $(params.resource-group)
+        - name: REGION
+          value: $(params.region)
+        - name: REGISTRY_NAMESPACE
+          value: $(params.registry-namespace)
+        - name: ARCHIVE_DIR
+          value: '/artifacts'
+      command: ["/bin/bash", "-c"]
+      args:
+        - |
+          #!/bin/bash
+          set -e -o pipefail;
+          cd /artifacts
+          export IBMCLOUD_TARGET_REGION=${REGION:-"eu-gb"};
+          echo "IBMCLOUD_TARGET_REGION $IBMCLOUD_TARGET_REGION";
+          echo "REGISTRY_NAMESPACE $REGISTRY_NAMESPACE";
+          source add_docker.sh
+          ibmcloud login --apikey "$IBMCLOUD_API_KEY" -r "$IBMCLOUD_TARGET_REGION";
+          DEVOPS_SIGNER="$DEVOPS_VALIDATION_SIGNER";
+          source secrets_management.sh
+          source signing_utils.sh
+          source create_signer.sh
+      

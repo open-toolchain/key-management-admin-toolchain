@@ -1,0 +1,48 @@
+---
+inputs:
+- type: git
+  branch: master
+  service: ${APP_REPO}
+  path: .tekton
+- type: git
+  branch: tkn_v1beta1
+  service: ${TEKTON_CATALOG_REPO}
+  path: git
+triggers:
+- type: manual
+  name: Manual Key Create Trigger
+  eventListener: key-create-listener
+- type: manual
+  name: Manual Key Delete Trigger
+  eventListener: key-delete-listener
+properties:
+- name: api-key
+  value: ${API_KEY}
+  type: SECURE
+- name: repository-integration
+  value: app-repo
+  type: text
+- name: repository
+  value: ${APP_REPO_FULL}
+  type: text
+- name: branch
+  value: master
+  type: text
+- name: registry-namespace
+  value: ${REGISTRY_NAMESPACE}
+  type: text
+- name: region
+  value: ${DEV_REGION_ID}
+  type: text
+- name: resource-group
+  value: ${DEV_RESOURCE_GROUP}
+  type: text
+- name: validation-signer
+  value: ${VALIDATION_SIGNER}
+  type: text
+- name: vault-name
+  value: ${VAULT_INSTANCE}
+  type: text
+- name: pipeline-debug
+  value: "0"
+  type: text
