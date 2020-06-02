@@ -78,7 +78,7 @@ services:
           BUILD_SIGNER: '{{form.pipeline.parameters.build_signer}}'
           VALIDATION_SIGNER: '{{form.pipeline.parameters.validation_signer}}'
           TEKTON_CATALOG_REPO: tekton-catalog-repo
-          APP_REPO_FULL: 'https://github.com/huayuenh/test_key'
+          APP_REPO_FULL: 'https://github.com/open-toolchain/key-management-admin-toolchain'
         execute: false
 form:
   pipeline:
