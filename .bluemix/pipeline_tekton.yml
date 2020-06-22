@@ -1,11 +1,11 @@
 ---
 inputs:
 - type: git
-  branch: master
+  branch: dual-template
   service: ${APP_REPO}
   path: .tekton
 - type: git
-  branch: tkn_v1beta1
+  branch: master
   service: ${TEKTON_CATALOG_REPO}
   path: git
 triggers:
