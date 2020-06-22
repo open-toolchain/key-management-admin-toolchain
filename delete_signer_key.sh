@@ -14,8 +14,7 @@ VAULT_DATA=$(buildVaultAccessDetailsJSON "$VAULT_INSTANCE" "$IBMCLOUD_TARGET_REG
 echo "Checking Key Protect Vault for keys"
 JSON_PRIV_DATA="$(readData "$REGISTRY_NAMESPACE.keys" "$VAULT_DATA")"
 JSON_PUB_DATA="$(readData "$REGISTRY_NAMESPACE.pub" "$VAULT_DATA")"
-EXISTING_KEY="$(getJSONValue "$DEVOPS_SIGNER" "$JSON_PRIV_DATA")"
-
+EXISTING_KEY="$(getJSONValue "$DEVOPS_SIGNER" "$JSON_PRIV_DATA")" 
 if [ "$EXISTING_KEY" ]; then
     echo "Key for $DEVOPS_SIGNER  found."
     echo "Removing  $DEVOPS_SIGNER singer key"
@@ -29,11 +28,9 @@ if [ "$EXISTING_KEY" ]; then
     fi
     #save public/private key pairs to the vault
     #UNCOMMENT FOR KEY UPDATE
-    #saveData "$REGISTRY_NAMESPACE.keys" "$VAULT_DATA" "$JSON_PRIV_DATA"
-    #saveData "$REGISTRY_NAMESPACE.pub" "$VAULT_DATA" "$JSON_PUB_DATA"
+    saveData "$REGISTRY_NAMESPACE.keys" "$VAULT_DATA" "$JSON_PRIV_DATA"
+    saveData "$REGISTRY_NAMESPACE.pub" "$VAULT_DATA" "$JSON_PUB_DATA"
 else
     echo "key for $DEVOPS_SIGNER already exists"
     echo "No op"
 fi
-
-

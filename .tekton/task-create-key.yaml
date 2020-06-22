@@ -18,7 +18,7 @@ spec:
       description: the ibmcloud registry region
     - name: vault-name
       description: The name of the Key Protect instance
-    - name: validation-signer
+    - name: signer
       description: The validation signer
     - name: resource-group
       description: The resource group
@@ -36,7 +36,7 @@ spec:
       mountPath: /artifacts
   steps:
     - name: create-key
-      image: ibmcom/pipeline-base-image
+      image: huayuenh/key
       env:
         - name: IBMCLOUD_API_KEY
           value: $(params.api-key)
@@ -48,8 +48,8 @@ spec:
           value: "/root"
         - name: VAULT_INSTANCE
           value: $(params.vault-name)
-        - name: DEVOPS_VALIDATION_SIGNER
-          value: $(params.validation-signer)
+        - name: SIGNER
+          value: $(params.signer)
         - name: IBMCLOUD_TARGET_RESOURCE_GROUP
           value: $(params.resource-group)
         - name: REGION
@@ -62,14 +62,14 @@ spec:
       args:
         - |
           #!/bin/bash
-          set -e -o pipefail;
+          #set -e -o pipefail;
           cd /artifacts
           export IBMCLOUD_TARGET_REGION=${REGION:-"eu-gb"};
           echo "IBMCLOUD_TARGET_REGION $IBMCLOUD_TARGET_REGION";
           echo "REGISTRY_NAMESPACE $REGISTRY_NAMESPACE";
-          source add_docker.sh
+          source add_docker.sh;
           ibmcloud login --apikey "$IBMCLOUD_API_KEY" -r "$IBMCLOUD_TARGET_REGION";
-          DEVOPS_SIGNER="$DEVOPS_VALIDATION_SIGNER";
+          DEVOPS_SIGNER="$SIGNER";
           source secrets_management.sh
           source signing_utils.sh
           source create_signer.sh

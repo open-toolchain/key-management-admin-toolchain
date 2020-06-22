@@ -10,7 +10,6 @@ template:
   required:
     - build
     - app-repo
-    - tekton-catalog-repo
   info:
     git url: >
       "[" + $env.repository + "]" +
@@ -31,18 +30,14 @@ services:
     parameters:
       repo_name: 'key-management-admin-toolchain-{{timestamp}}'
       repo_url: >
-        $env.type === 'link' ?
-          $env.app_repo : 'https://github.com/open-toolchain/key-management-admin-toolchain'
-      source_repo_url: >
-        $env.type === 'fork' || $env.type === 'clone' ?
-          $env.app_repo : 'https://github.com/open-toolchain/key-management-admin-toolchain'
+        $env.repository
       type: $env.type || 'link'
       has_issues: false
       enable_traceability: false
       legal: true
   tekton-catalog-repo:
     service_id: >
-      $env.source_provider ? $env.source_provider : 'githubconsolidated'
+      $env.pipeline_type === 'tekton' ? 'githubconsolidated' : ''
     parameters:
       repo_name: 'common-tekton-tasks-{{timestamp}}'
       repo_url: >
@@ -62,7 +57,8 @@ services:
         - app-repo
       name: '{{services.app-repo.parameters.repo_name}}'
       ui-pipeline: true
-      type: tekton
+      type: >
+        $env.pipeline_type === 'tekton' ? 'tekton': 'classic'
       configuration:
         content:
           $text: pipeline_tekton.yml

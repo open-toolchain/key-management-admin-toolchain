@@ -10,11 +10,17 @@ inputs:
   path: git
 triggers:
 - type: manual
-  name: Manual Key Create Trigger
-  eventListener: key-create-listener
+  name: Create Validate Key
+  eventListener: key-validate-listener
 - type: manual
-  name: Manual Key Delete Trigger
-  eventListener: key-delete-listener
+  name: Create Build Key
+  eventListener: key-build-listener
+- type: manual
+  name: Delete Build Key
+  eventListener: key-delete-build-listener
+- type: manual
+  name: Delete Validate Key
+  eventListener: key-delete-validate-listener
 properties:
 - name: api-key
   value: ${API_KEY}
@@ -39,6 +45,9 @@ properties:
   type: text
 - name: validation-signer
   value: ${VALIDATION_SIGNER}
+  type: text
+- name: build-signer
+  value: ${BUILD_SIGNER}
   type: text
 - name: vault-name
   value: ${VAULT_INSTANCE}
