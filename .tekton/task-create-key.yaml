@@ -36,7 +36,7 @@ spec:
       mountPath: /artifacts
   steps:
     - name: create-key
-      image: huayuenh/key
+      image: ibmcom/pipeline-base-image:2.6
       env:
         - name: IBMCLOUD_API_KEY
           value: $(params.api-key)
