@@ -89,7 +89,7 @@ metadata:
 spec:
   params:
     - name: revision
-      value: "master"
+      value: "dual-template"
 ---
 apiVersion: tekton.dev/v1beta1
 kind: EventListener
