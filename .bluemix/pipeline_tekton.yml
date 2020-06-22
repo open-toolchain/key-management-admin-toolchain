@@ -32,7 +32,7 @@ properties:
   value: ${APP_REPO_FULL}
   type: text
 - name: branch
-  value: master
+  value: dual-template
   type: text
 - name: registry-namespace
   value: ${REGISTRY_NAMESPACE}
