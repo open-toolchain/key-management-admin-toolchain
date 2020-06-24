@@ -4,10 +4,6 @@ inputs:
   branch: dual-template
   service: ${APP_REPO}
   path: .tekton
-- type: git
-  branch: master
-  service: ${TEKTON_CATALOG_REPO}
-  path: git
 triggers:
 - type: manual
   name: Create Validate Key
@@ -30,9 +26,6 @@ properties:
   type: SECURE
 - name: repository-integration
   value: app-repo
-  type: text
-- name: repository
-  value: ${APP_REPO_FULL}
   type: text
 - name: branch
   value: dual-template

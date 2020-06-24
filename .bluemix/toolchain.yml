@@ -37,15 +37,6 @@ services:
       has_issues: false
       enable_traceability: false
       legal: true
-  tekton-catalog-repo:
-    service_id: >
-      $env.pipeline_type === 'tekton' ? 'githubconsolidated' : ''
-    parameters:
-      repo_url: "https://github.com/open-toolchain/tekton-catalog"
-      type: $env.type || 'link'
-      has_issues: false
-      enable_traceability: false
-      legal: true
   build:
     service_id: pipeline
     parameters:
@@ -68,19 +59,6 @@ services:
           VAULT_INSTANCE: '{{form.pipeline.parameters.vault_name}}'
           BUILD_SIGNER: '{{form.pipeline.parameters.build_signer}}'
           VALIDATION_SIGNER: '{{form.pipeline.parameters.validation_signer}}'
-          TEKTON_CATALOG_REPO: tekton-catalog-repo
-          APP_REPO_FULL: >
-            if ( $env.source_provider === 'githubconsolidated' ) {
-              "https://github.com/{{services.repo.parameters.owner_id}}/{{services.repo.parameters.repo_name}}";
-            } else if ( $env.source_provider === 'gitlab' ) {
-              "https://gitlab.com/{{services.repo.parameters.owner_id}}/{{services.repo.parameters.repo_name}}";
-            } else if ( $env.source_provider === 'bitbucketgit' ) {
-              "https://bitbucket.org/{{services.repo.parameters.owner_id}}/{{services.repo.parameters.repo_name}}";
-            } else if ( $env.source_provider === 'github_integrated' ) {
-              "https://github.ibm.com/{{services.repo.parameters.owner_id}}/{{services.repo.parameters.repo_name}}";
-            } else {
-              "https://us-south.git.cloud.ibm.com/{{services.repo.parameters.owner_id}}/{{services.repo.parameters.repo_name}}"
-            }
         execute: false
 form:
   pipeline:

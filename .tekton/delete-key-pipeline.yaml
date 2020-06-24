@@ -29,28 +29,7 @@ spec:
   workspaces:
     - name: pipeline-ws
   tasks:
-    - name: git-clone
-      taskRef:
-        name: git-clone-repo
-      params:
-        - name: continuous-delivery-context-secret
-          value: "secure-properties"
-        - name: ibmcloud-apikey-secret-key
-          value: "toolchain-apikey"
-        - name: repository
-          value: $(params.repository)
-        - name: branch
-          value: $(params.branch)
-        - name: revision
-          value: $(params.revision)
-        - name: pipeline-debug
-          value: $(params.pipeline-debug)
-      workspaces:
-        - name: output
-          workspace: pipeline-ws
     - name: delete-key
-      runAfter:
-        - git-clone
       taskRef:
         name: delete-key-task
       params:

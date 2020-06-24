@@ -36,7 +36,7 @@ spec:
       mountPath: /artifacts
   steps:
     - name: delete-key
-      image: ibmcom/pipeline-base-image:2.6
+      image: ibmcom/pipeline-base-image
       env:
         - name: IBMCLOUD_API_KEY
           value: $(params.api-key)
@@ -81,8 +81,8 @@ spec:
             
             DEVOPS_SIGNER="$IGNER"
             cd /artifacts
-            source secrets_management.sh
-            source signing_utils.sh
-            source delete_signer_key.sh
+            source <(curl -sSL "https://raw.githubusercontent.com/open-toolchain/commons/master/scripts/secrets_management.sh")
+            source <(curl -sSL "https://raw.githubusercontent.com/open-toolchain/commons/master/scripts/image_signing/signing_utils.sh")
+            source <(curl -sSL "https://raw.githubusercontent.com/open-toolchain/commons/master/scripts/image_signing/delete_signer.sh")
           fi
       
