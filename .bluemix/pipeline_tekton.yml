@@ -6,6 +6,9 @@ inputs:
   path: .tekton
 triggers:
 - type: manual
+  name: Create Keys
+  eventListener: keys-listener
+- type: manual
   name: Create Validate Key
   eventListener: key-validate-listener
 - type: manual
