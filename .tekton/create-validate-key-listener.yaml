@@ -5,10 +5,20 @@ metadata:
   name: create-validate-key
 spec:
   params:
+    - name: toolchain-apikey
+      description: the ibmcloud api key
+    - name: repository
+      description: target repository
+    - name: branch
+      description: the branch for the git repo
     - name: revision
       description: the branch for the git repo
-    - name: apikey
-      description: the ibmcloud api key
+    - name: registry-namespace
+      description: the registry namespace
+    - name: resource-group
+      description: The resource group
+    - name: pipeline-debug
+      default: "0"
     - name: region
       description: the ibmcloud  region
       default: us-south
@@ -16,18 +26,6 @@ spec:
       description: The name of the Key Protect instance
     - name: validation-signer
       description: The validation signer
-    - name: resource-group
-      description: The resource group
-    - name: registry-namespace
-      description: the registry namespace
-    - name: repository
-      description: target repository
-    - name: branch
-      description: the branch for the git repo
-    - name: repository-integration
-      description: the repo integration name
-    - name: pipeline-debug
-      description: toggles debug mode for the pipeline
   resourcetemplates:
     - apiVersion: v1
       kind: PersistentVolumeClaim
@@ -40,13 +38,6 @@ spec:
         volumeMode: Filesystem
         accessModes:
           - ReadWriteOnce
-    - apiVersion: v1
-      kind: Secret
-      metadata:
-        name: cd-secret
-      type: Opaque
-      stringData:
-        API_KEY: $(params.api-key)
     - apiVersion: tekton.dev/v1beta1
       kind: PipelineRun
       metadata:
@@ -64,7 +55,7 @@ spec:
         - name: revision
           value: $(params.revision)
         - name: api-key
-          value: $(params.api-key)
+          value: $(params.toolchain-apikey)
         - name: region
           value: $(params.region)
         - name: vault-name
@@ -88,8 +79,10 @@ metadata:
   name: key-validate-binding
 spec:
   params:
-    - name: revision
-      value: "master"
+    - name: repository
+      value: "$params.repository"
+    - name: branch
+      value: "$params.branch"
 ---
 apiVersion: tekton.dev/v1beta1
 kind: EventListener

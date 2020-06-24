@@ -9,7 +9,7 @@ template:
   icon: secure-lock-kubernetes.svg
   required:
     - build
-    - app-repo
+    - repo
   info:
     git url: >
       "[" + $env.repository + "]" +
@@ -18,15 +18,17 @@ template:
       "[" + $env.branch + "]" +
         "(" + $env.repository +
           "/tree/" + $env.branch + ")"
+  $configuration:
+    ENABLE_EXTENSIONS: true
+    ENABLE_IF_ELSE: true
+    EXPRESSION_MAXLENGTH: 1000
 toolchain:
-  name: 'key-management-admin-toolchain-{{timestamp}}'
-  template:
-    getting_started:
-      $ref: "#/messages/template.gettingStarted"
+  name: 'key-setup-{{timestamp}}'
+
 services:
-  app-repo:
+  repo:
     service_id: >
-      $env.source_provider ? $env.source_provider : 'githubconsolidated'
+      $env.pipeline_type === 'tekton' ? 'githubconsolidated' : ''
     parameters:
       repo_name: 'key-management-admin-toolchain-{{timestamp}}'
       repo_url: >
@@ -39,13 +41,7 @@ services:
     service_id: >
       $env.pipeline_type === 'tekton' ? 'githubconsolidated' : ''
     parameters:
-      repo_name: 'common-tekton-tasks-{{timestamp}}'
-      repo_url: >
-        $env.type === 'link' ?
-          $env.app_repo : 'https://github.com/open-toolchain/tekton-catalog'
-      source_repo_url: >
-        $env.type === 'fork' || $env.type === 'clone' ?
-          $env.app_repo : 'https://github.com/open-toolchain/tekton-catalog'
+      repo_url: "https://github.com/open-toolchain/tekton-catalog"
       type: $env.type || 'link'
       has_issues: false
       enable_traceability: false
@@ -53,35 +49,46 @@ services:
   build:
     service_id: pipeline
     parameters:
-      services:
-        - app-repo
-      name: '{{services.app-repo.parameters.repo_name}}'
+      name: '{{services.repo.parameters.repo_name}}'
       ui-pipeline: true
       type: >
         $env.pipeline_type === 'tekton' ? 'tekton': 'classic'
       configuration:
         content:
-          $text: pipeline_tekton.yml
+          $text: >
+            $env.pipeline_type === 'tekton' ? 'pipeline_tekton.yml' : 'manage_keys.yml'
         env:
-          APP_REPO: app-repo
+          APP_REPO: repo
           APP_NAME: '{{form.pipeline.parameters.app-name}}'
           REGISTRY_REGION_ID: '{{form.pipeline.parameters.registry-region}}'
           REGISTRY_NAMESPACE: '{{form.pipeline.parameters.registry-namespace}}'
           API_KEY: '{{form.pipeline.parameters.api-key}}'
-          DEV_REGION_ID: '{{form.pipeline.parameters.prod-region}}'
-          DEV_RESOURCE_GROUP: '{{form.pipeline.parameters.prod-resource-group}}'
+          BUILD_REGION_ID: '{{form.pipeline.parameters.prod-region}}'
+          BUILD_RESOURCE_GROUP: '{{form.pipeline.parameters.prod-resource-group}}'
           VAULT_INSTANCE: '{{form.pipeline.parameters.vault_name}}'
           BUILD_SIGNER: '{{form.pipeline.parameters.build_signer}}'
           VALIDATION_SIGNER: '{{form.pipeline.parameters.validation_signer}}'
           TEKTON_CATALOG_REPO: tekton-catalog-repo
-          APP_REPO_FULL: 'https://github.com/open-toolchain/key-management-admin-toolchain'
+          APP_REPO_FULL: >
+            if ( $env.source_provider === 'githubconsolidated' ) {
+              "https://github.com/{{services.repo.parameters.owner_id}}/{{services.repo.parameters.repo_name}}";
+            } else if ( $env.source_provider === 'gitlab' ) {
+              "https://gitlab.com/{{services.repo.parameters.owner_id}}/{{services.repo.parameters.repo_name}}";
+            } else if ( $env.source_provider === 'bitbucketgit' ) {
+              "https://bitbucket.org/{{services.repo.parameters.owner_id}}/{{services.repo.parameters.repo_name}}";
+            } else if ( $env.source_provider === 'github_integrated' ) {
+              "https://github.ibm.com/{{services.repo.parameters.owner_id}}/{{services.repo.parameters.repo_name}}";
+            } else {
+              "https://us-south.git.cloud.ibm.com/{{services.repo.parameters.owner_id}}/{{services.repo.parameters.repo_name}}"
+            }
         execute: false
 form:
   pipeline:
     parameters:
-      app-name: '{{services.app-repo.parameters.repo_name}}'
+      app-name: '{{toolchain.name}}'
       vault_name: ''
       build_signer: 'devops-build'
       validation_signer: 'devops-validation'
     schema:
       $ref: deploy.json
+

@@ -5,7 +5,7 @@ inputs:
   service: ${APP_REPO}
   path: .tekton
 - type: git
-  branch: tkn_v1beta1
+  branch: master
   service: ${TEKTON_CATALOG_REPO}
   path: git
 triggers:
@@ -25,6 +25,9 @@ properties:
 - name: api-key
   value: ${API_KEY}
   type: SECURE
+- name: toolchain-apikey
+  value: ${API_KEY}
+  type: SECURE
 - name: repository-integration
   value: app-repo
   type: text
@@ -38,10 +41,10 @@ properties:
   value: ${REGISTRY_NAMESPACE}
   type: text
 - name: region
-  value: ${DEV_REGION_ID}
+  value: ${BUILD_REGION_ID}
   type: text
 - name: resource-group
-  value: ${DEV_RESOURCE_GROUP}
+  value: ${BUILD_RESOURCE_GROUP}
   type: text
 - name: validation-signer
   value: ${VALIDATION_SIGNER}
