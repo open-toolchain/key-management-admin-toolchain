@@ -1,0 +1,81 @@
+---
+apiVersion: tekton.dev/v1beta1
+kind: Pipeline
+metadata:
+  name: keys-pipeline
+spec:
+  params:
+    - name: revision
+      description: the branch for the git repo
+    - name: api-key
+      description: the ibmcloud api key
+    - name: vault-name
+      description: The name of the Key Protect instance
+    - name: build-signer
+      description: The  build signer
+    - name: validation-signer
+      description: The  validation signer
+    - name: resource-group
+      description: The resource group
+    - name: region
+      description: the region
+    - name: registry-namespace
+      description: the registry namespace
+    - name: repository
+      description: target repository
+    - name: branch
+      description: the branch for the git repo
+    - name: repository-integration
+      description: the repo integration name
+    - name: pipeline-debug
+      default: "0"
+  workspaces:
+    - name: pipeline-ws
+  tasks:
+    - name: create-build-key
+      taskRef:
+        name: create-key-task
+      params:
+        - name: repository
+          value: $(params.repository)
+        - name: revision
+          value: $(params.revision)
+        - name: api-key
+          value: $(params.api-key)
+        - name: region
+          value: $(params.region)
+        - name: vault-name
+          value: $(params.vault-name)
+        - name: signer
+          value: $(params.build-signer)
+        - name: resource-group
+          value: $(params.resource-group)
+        - name: registry-namespace
+          value: $(params.registry-namespace)
+      workspaces:
+        - name: artifacts
+          workspace: pipeline-ws
+    - name: create-validation-key
+      taskRef:
+        name: create-key-task
+      runAfter: [create-build-key]
+      params:
+        - name: repository
+          value: $(params.repository)
+        - name: revision
+          value: $(params.revision)
+        - name: api-key
+          value: $(params.api-key)
+        - name: region
+          value: $(params.region)
+        - name: vault-name
+          value: $(params.vault-name)
+        - name: signer
+          value: $(params.validation-signer)
+        - name: resource-group
+          value: $(params.resource-group)
+        - name: registry-namespace
+          value: $(params.registry-namespace)
+      workspaces:
+        - name: artifacts
+          workspace: pipeline-ws  
