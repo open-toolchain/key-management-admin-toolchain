@@ -27,7 +27,7 @@ spec:
     - apiVersion: tekton.dev/v1beta1
       kind: PipelineRun
       metadata:
-        name: create-build-and-validation-keys-$(uid)
+        name: create-keys-$(uid)
       spec:
         pipelineRef:
             name: keys-pipeline
