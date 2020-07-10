@@ -4,11 +4,6 @@ metadata:
   name: create-key-task
 spec:
   params:
-    - name: repository
-      description: the git repo
-    - name: revision
-      description: the revision
-      default: master
     - name: api-key
       description: the ibmcloud api key
     - name: api
@@ -19,21 +14,14 @@ spec:
     - name: vault-name
       description: The name of the Key Protect instance
     - name: signer
-      description: The validation signer
+      description: The signer
     - name: resource-group
       description: The resource group
     - name: registry-namespace
       description: the registry namespace
-    - name: mount-path
-      description: mount path directory 
-      default: /artifacts
-    - name: volume
-      description: volume mount name
-      default: task-volume
-  workspaces:
-    - name: artifacts
-      description: A workspace backing by a volume where the files (Dockerfile etc..) are expected to be
-      mountPath: /artifacts
+    - name: pipeline-debug
+      description: Pipeline debug mode
+      default: "0"
   steps:
     - name: create-key
       image: ibmcom/pipeline-base-image:latest
@@ -52,16 +40,24 @@ spec:
           value: $(params.signer)
         - name: IBMCLOUD_TARGET_RESOURCE_GROUP
           value: $(params.resource-group)
-        - name: REGION
-          value: $(params.region)
         - name: REGISTRY_NAMESPACE
           value: $(params.registry-namespace)
         - name: ARCHIVE_DIR
-          value: '/artifacts'
+          value: '/task'
+        - name: PIPELINE_DEBUG
+          value: $(params.pipeline-debug)
       script: |
         #!/bin/bash
-        #set -e -o pipefail;
-        cd /artifacts
+        # set -e -o pipefail;
+
+        if [ $PIPELINE_DEBUG == 1 ]; then
+            pwd
+            env
+            trap env EXIT
+            set -x
+        fi
+
+        cd $ARCHIVE_DIR
         export IBMCLOUD_TARGET_REGION=${REGION:-"eu-gb"};
         echo "IBMCLOUD_TARGET_REGION $IBMCLOUD_TARGET_REGION";
         echo "REGISTRY_NAMESPACE $REGISTRY_NAMESPACE";
@@ -70,4 +66,10 @@ spec:
         DEVOPS_SIGNER="$SIGNER";
         source <(curl -sSL "https://raw.githubusercontent.com/open-toolchain/commons/master/scripts/image_signing/signing_utils.sh")
         source <(curl -sSL "https://raw.githubusercontent.com/open-toolchain/commons/master/scripts/image_signing/create_signer.sh")
+      volumeMounts:
+        - mountPath: /task
+          name: task-volume
+  volumes:
+    - name: task-volume
+      emptyDir: {}
       
