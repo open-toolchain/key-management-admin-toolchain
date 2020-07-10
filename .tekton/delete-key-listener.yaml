@@ -2,76 +2,42 @@
 apiVersion: tekton.dev/v1beta1
 kind: TriggerTemplate
 metadata:
-  name: delete-build-key
+  name: delete-key
 spec:
   params:
-    - name: revision
-      description: the branch for the git repo
-    - name: toolchain-apikey
-      description: the ibmcloud api key
     - name: region
       description: the ibmcloud  region
       default: us-south
     - name: vault-name
       description: The name of the Key Protect instance
-    - name: build-signer
-      description: The build signer
+    - name: signer
+      description: The signer
     - name: resource-group
       description: The resource group
     - name: registry-namespace
       description: the registry namespace
-    - name: repository
-      description: target repository
-    - name: branch
-      description: the branch for the git repo
-    - name: repository-integration
-      description: the repo integration name
     - name: pipeline-debug
       description: toggles debug mode for the pipeline
+      default: "0"
   resourcetemplates:
-    - apiVersion: v1
-      kind: PersistentVolumeClaim
-      metadata:
-        name: pipelinerun-$(uid)-pvc
-      spec:
-        resources:
-          requests:
-            storage:  5Gi
-        volumeMode: Filesystem
-        accessModes:
-          - ReadWriteOnce
     - apiVersion: tekton.dev/v1beta1
       kind: PipelineRun
       metadata:
-        name: pipelinerun-$(uid)
+        name: delete-key-$(uid)
       spec:
         pipelineRef:
             name: delete-key-pipeline
-        workspaces:
-          - name: pipeline-ws
-            persistentVolumeClaim:
-              claimName: pipelinerun-$(uid)-pvc
         params:
-        - name: repository
-          value: $(params.repository)
-        - name: revision
-          value: $(params.revision)
-        - name: api-key
-          value: $(params.toolchain-apikey)
         - name: region
           value: $(params.region)
         - name: vault-name
           value: $(params.vault-name)
         - name: signer
-          value: $(params.build-signer)
+          value: $(params.signer)
         - name: resource-group
           value: $(params.resource-group)
         - name: registry-namespace
           value: $(params.registry-namespace)
-        - name: branch
-          value: $(params.branch)
-        - name: repository-integration
-          value: $(params.repository-integration)
         - name: pipeline-debug
           value: $(params.pipeline-debug)
 ---
@@ -81,8 +47,8 @@ metadata:
   name: key-delete-build-binding
 spec:
   params:
-    - name: revision
-      value: "master"
+    - name: signer
+      value: $(params.build-signer)
 ---
 apiVersion: tekton.dev/v1beta1
 kind: EventListener
@@ -93,4 +59,24 @@ spec:
     - binding:
         name: key-delete-build-binding
       template:
-        name: delete-build-key
+        name: delete-key
+---
+apiVersion: tekton.dev/v1beta1
+kind: TriggerBinding
+metadata:
+  name: key-delete-validate-binding
+spec:
+  params:
+    - name: signer
+      value: $(params.validation-signer)
+---
+apiVersion: tekton.dev/v1beta1
+kind: EventListener
+metadata:
+  name: key-delete-validate-listener
+spec:
+  triggers:
+    - binding:
+        name: key-delete-validate-binding
+      template:
+        name: delete-key

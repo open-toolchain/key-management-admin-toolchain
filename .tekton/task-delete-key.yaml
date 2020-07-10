@@ -4,16 +4,15 @@ metadata:
   name: delete-key-task
 spec:
   params:
-    - name: repository
-      description: the git repo
-    - name: revision
-      description: the revision
-      default: master
-    - name: api-key
-      description: the ibmcloud api key
-    - name: api
+    - name: ibmcloud-api
       description: the ibmcloud api endpoint
       default: "https://cloud.ibm.com"
+    - name: continuous-delivery-context-secret
+      description: name of the secret containing the continuous delivery pipeline context secrets
+      default: "secure-properties"
+    - name: ibmcloud-apikey-secret-key
+      description: field in the secret that contains the api key used to login to ibmcloud
+      default: "api-key"
     - name: region
       description: the ibmcloud registry region
     - name: vault-name
@@ -24,24 +23,20 @@ spec:
       description: The resource group
     - name: registry-namespace
       description: the registry namespace
-    - name: mount-path
-      description: mount path directory 
-      default: /artifacts
-    - name: volume
-      description: volume mount name
-      default: task-volume
-  workspaces:
-    - name: artifacts
-      description: A workspace backing by a volume where the files (Dockerfile etc..) are expected to be
-      mountPath: /artifacts
+    - name: pipeline-debug
+      description: Pipeline debug mode
+      default: "0"
   steps:
     - name: delete-key
-      image: ibmcom/pipeline-base-image
+      image: ibmcom/pipeline-base-image:latest
       env:
         - name: IBMCLOUD_API_KEY
-          value: $(params.api-key)
-        - name: API
-          value: $(params.api)
+          valueFrom:
+            secretKeyRef:
+              name: $(params.continuous-delivery-context-secret)
+              key: $(params.ibmcloud-apikey-secret-key)
+        - name: IBMCLOUD_API
+          value: $(params.ibmcloud-api)
         - name: REGION
           value: $(params.region)
         - name: HOME
@@ -52,37 +47,38 @@ spec:
           value: $(params.signer)
         - name: IBMCLOUD_TARGET_RESOURCE_GROUP
           value: $(params.resource-group)
-        - name: REGION
-          value: $(params.region)
         - name: REGISTRY_NAMESPACE
           value: $(params.registry-namespace)
-        - name: ARCHIVE_DIR
-          value: '/artifacts'
-      command: ["/bin/bash", "-c"]
-      args:
-        - |
-          #!/bin/bash
-          echo "deleting key"
-          # Restore root & repository keys
-          if [ -z "$VAULT_INSTANCE" ]; then
-            echo "No op"
+        - name: PIPELINE_DEBUG
+          value: $(params.pipeline-debug)
+      script: |
+        #!/bin/bash
+
+        if [ $PIPELINE_DEBUG == 1 ]; then
+            pwd
+            env
+            trap env EXIT
+            set -x
+        fi
+
+        # Restore root & repository keys
+        if [ -z "$VAULT_INSTANCE" ]; then
+          echo "No op"
+        else
+          export IBMCLOUD_TARGET_REGION=${REGION:-"eu-gb"}
+          
+          # if target region is in the 'ibm:yp:<region>' just keep the region part
+          REGION_SUBSET=$(echo "$IBMCLOUD_TARGET_REGION" | awk -F ':' '{print $3;}')
+          if [[ -z "$REGION_SUBSET" ]]; then
+            echo "IBM Cloud Target Region is $IBMCLOUD_TARGET_REGION"
           else
-            export IBMCLOUD_TARGET_REGION=${REGION:-"eu-gb"}
-            
-            # if target region is in the 'ibm:yp:<region>' just keep the region part
-            REGION_SUBSET=$(echo "$IBMCLOUD_TARGET_REGION" | awk -F ':' '{print $3;}')
-            if [[ -z "$REGION_SUBSET" ]]; then
-              echo "IBM Cloud Target Region is $IBMCLOUD_TARGET_REGION"
-            else
-              export IBMCLOUD_TARGET_REGION=$REGION_SUBSET
-              echo "IBM Cloud Target Region is $IBMCLOUD_TARGET_REGION. export IBMCLOUD_TARGET_REGION=$REGION_SUBSET done"
-            fi
-            ibmcloud login --apikey "$IBMCLOUD_API_KEY" -r "$IBMCLOUD_TARGET_REGION"
-            
-            DEVOPS_SIGNER="$IGNER"
-            cd /artifacts
-            source <(curl -sSL "https://raw.githubusercontent.com/open-toolchain/commons/master/scripts/secrets_management.sh")
-            source <(curl -sSL "https://raw.githubusercontent.com/open-toolchain/commons/master/scripts/image_signing/signing_utils.sh")
-            source <(curl -sSL "https://raw.githubusercontent.com/open-toolchain/commons/master/scripts/image_signing/delete_signer.sh")
+            export IBMCLOUD_TARGET_REGION=$REGION_SUBSET
+            echo "IBM Cloud Target Region is $IBMCLOUD_TARGET_REGION. export IBMCLOUD_TARGET_REGION=$REGION_SUBSET done"
           fi
-      
+          ibmcloud config --check-version false
+          ibmcloud login -a "$IBMCLOUD_API" --apikey "$IBMCLOUD_API_KEY" -r "$IBMCLOUD_TARGET_REGION"
+          
+          DEVOPS_SIGNER="$SIGNER"
+          source <(curl -sSL "https://raw.githubusercontent.com/open-toolchain/commons/master/scripts/image_signing/signing_utils.sh")
+          source <(curl -sSL "https://raw.githubusercontent.com/open-toolchain/commons/master/scripts/image_signing/delete_signer_key.sh")
+        fi

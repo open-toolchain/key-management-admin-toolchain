@@ -9,11 +9,11 @@ triggers:
   name: Create Keys
   eventListener: keys-listener
 - type: manual
-  name: Create Validate Key
-  eventListener: key-validate-listener
-- type: manual
   name: Create Build Key
   eventListener: key-build-listener
+- type: manual
+  name: Create Validate Key
+  eventListener: key-validate-listener
 - type: manual
   name: Delete Build Key
   eventListener: key-delete-build-listener
@@ -24,15 +24,6 @@ properties:
 - name: api-key
   value: ${API_KEY}
   type: SECURE
-- name: toolchain-apikey
-  value: ${API_KEY}
-  type: SECURE
-- name: repository-integration
-  value: app-repo
-  type: text
-- name: branch
-  value: dual-template
-  type: text
 - name: registry-namespace
   value: ${REGISTRY_NAMESPACE}
   type: text

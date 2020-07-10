@@ -2,7 +2,7 @@
 apiVersion: tekton.dev/v1beta1
 kind: TriggerTemplate
 metadata:
-  name: create-keys
+  name: create-key
 spec:
   params:
     - name: region
@@ -10,10 +10,8 @@ spec:
       default: us-south
     - name: vault-name
       description: The name of the Key Protect instance
-    - name: build-signer
-      description: The build signer
-    - name: validation-signer
-      description: The validation signer
+    - name: signer
+      description: The signer
     - name: resource-group
       description: The resource group
     - name: registry-namespace
@@ -25,19 +23,17 @@ spec:
     - apiVersion: tekton.dev/v1beta1
       kind: PipelineRun
       metadata:
-        name: create-keys-$(uid)
+        name: create-key-$(uid)
       spec:
         pipelineRef:
-            name: keys-pipeline
+            name: pipeline
         params:
         - name: region
           value: $(params.region)
         - name: vault-name
           value: $(params.vault-name)
-        - name: build-signer
-          value: $(params.build-signer)
-        - name: validation-signer
-          value: $(params.validation-signer)
+        - name: signer
+          value: $(params.signer)
         - name: resource-group
           value: $(params.resource-group)
         - name: registry-namespace
@@ -48,17 +44,39 @@ spec:
 apiVersion: tekton.dev/v1beta1
 kind: TriggerBinding
 metadata:
-  name: key-binding
+  name: key-build-binding
 spec:
   params:
+    - name: signer
+      value: "$(params.build-signer)"
 ---
 apiVersion: tekton.dev/v1beta1
 kind: EventListener
 metadata:
-  name: keys-listener
+  name: key-build-listener
 spec:
   triggers:
     - binding:
-        name: key-binding
+        name: key-build-binding
       template:
-        name: create-keys
+        name: create-key
+---
+apiVersion: tekton.dev/v1beta1
+kind: TriggerBinding
+metadata:
+  name: key-validate-binding
+spec:
+  params:
+    - name: signer
+      value: $(params.validation-signer)
+---
+apiVersion: tekton.dev/v1beta1
+kind: EventListener
+metadata:
+  name: key-validate-listener
+spec:
+  triggers:
+    - binding:
+        name: key-validate-binding
+      template:
+        name: create-key
