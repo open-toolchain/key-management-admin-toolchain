@@ -5,8 +5,6 @@ metadata:
   name: keys-pipeline
 spec:
   params:
-    - name: api-key
-      description: the ibmcloud api key
     - name: vault-name
       description: The name of the Key Protect instance
     - name: build-signer
@@ -26,8 +24,6 @@ spec:
       taskRef:
         name: create-key-task
       params:
-        - name: api-key
-          value: $(params.api-key)
         - name: region
           value: $(params.region)
         - name: vault-name
@@ -45,8 +41,6 @@ spec:
         name: create-key-task
       runAfter: [create-build-key]
       params:
-        - name: api-key
-          value: $(params.api-key)
         - name: region
           value: $(params.region)
         - name: vault-name

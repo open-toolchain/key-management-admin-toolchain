@@ -4,8 +4,6 @@ metadata:
   name: delete-key-pipeline
 spec:
   params:
-    - name: api-key
-      description: the ibmcloud api key
     - name: vault-name
       description: The name of the Key Protect instance
     - name: signer
@@ -23,8 +21,6 @@ spec:
       taskRef:
         name: delete-key-task
       params:
-        - name: api-key
-          value: $(params.api-key)
         - name: region
           value: $(params.region)
         - name: vault-name

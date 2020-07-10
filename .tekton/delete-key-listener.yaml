@@ -5,8 +5,6 @@ metadata:
   name: delete-key
 spec:
   params:
-    - name: toolchain-apikey
-      description: the ibmcloud api key
     - name: region
       description: the ibmcloud  region
       default: us-south
@@ -30,8 +28,6 @@ spec:
         pipelineRef:
             name: delete-key-pipeline
         params:
-        - name: api-key
-          value: $(params.toolchain-apikey)
         - name: region
           value: $(params.region)
         - name: vault-name

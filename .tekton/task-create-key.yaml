@@ -4,11 +4,15 @@ metadata:
   name: create-key-task
 spec:
   params:
-    - name: api-key
-      description: the ibmcloud api key
     - name: ibmcloud-api
       description: the ibmcloud api endpoint
       default: "https://cloud.ibm.com"
+    - name: continuous-delivery-context-secret
+      description: name of the secret containing the continuous delivery pipeline context secrets
+      default: "secure-properties"
+    - name: ibmcloud-apikey-secret-key
+      description: field in the secret that contains the api key used to login to ibmcloud
+      default: "api-key"
     - name: region
       description: the ibmcloud registry region
     - name: vault-name
@@ -27,7 +31,10 @@ spec:
       image: ibmcom/pipeline-base-image:latest
       env:
         - name: IBMCLOUD_API_KEY
-          value: $(params.api-key)
+          valueFrom:
+            secretKeyRef:
+              name: $(params.continuous-delivery-context-secret)
+              key: $(params.ibmcloud-apikey-secret-key)
         - name: IBMCLOUD_API
           value: $(params.ibmcloud-api)
         - name: REGION
