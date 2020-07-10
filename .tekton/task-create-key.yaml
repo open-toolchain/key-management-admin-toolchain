@@ -6,7 +6,7 @@ spec:
   params:
     - name: api-key
       description: the ibmcloud api key
-    - name: api
+    - name: ibmcloud-api
       description: the ibmcloud api endpoint
       default: "https://cloud.ibm.com"
     - name: region
@@ -28,8 +28,8 @@ spec:
       env:
         - name: IBMCLOUD_API_KEY
           value: $(params.api-key)
-        - name: API
-          value: $(params.api)
+        - name: IBMCLOUD_API
+          value: $(params.ibmcloud-api)
         - name: REGION
           value: $(params.region)
         - name: HOME
@@ -58,12 +58,17 @@ spec:
         fi
 
         cd $ARCHIVE_DIR
+        
         export IBMCLOUD_TARGET_REGION=${REGION:-"eu-gb"};
         echo "IBMCLOUD_TARGET_REGION $IBMCLOUD_TARGET_REGION";
         echo "REGISTRY_NAMESPACE $REGISTRY_NAMESPACE";
         source <(curl -sSL "https://raw.githubusercontent.com/open-toolchain/commons/master/scripts/image_signing/add_docker.sh")
-        ibmcloud login --apikey "$IBMCLOUD_API_KEY" -r "$IBMCLOUD_TARGET_REGION";
+
+        ibmcloud config --check-version false
+        ibmcloud login -a "$IBMCLOUD_API" --apikey "$IBMCLOUD_API_KEY" -r "$IBMCLOUD_TARGET_REGION"
+
         DEVOPS_SIGNER="$SIGNER";
+
         source <(curl -sSL "https://raw.githubusercontent.com/open-toolchain/commons/master/scripts/image_signing/signing_utils.sh")
         source <(curl -sSL "https://raw.githubusercontent.com/open-toolchain/commons/master/scripts/image_signing/create_signer.sh")
       volumeMounts:
