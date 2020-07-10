@@ -2,32 +2,33 @@
 apiVersion: tekton.dev/v1beta1
 kind: TriggerTemplate
 metadata:
-  name: create-validate-key
+  name: delete-key
 spec:
   params:
     - name: toolchain-apikey
       description: the ibmcloud api key
-    - name: registry-namespace
-      description: the registry namespace
-    - name: resource-group
-      description: The resource group
     - name: region
       description: the ibmcloud  region
       default: us-south
     - name: vault-name
       description: The name of the Key Protect instance
-    - name: validation-signer
-      description: The validation signer
+    - name: signer
+      description: The signer
+    - name: resource-group
+      description: The resource group
+    - name: registry-namespace
+      description: the registry namespace
     - name: pipeline-debug
+      description: toggles debug mode for the pipeline
       default: "0"
   resourcetemplates:
     - apiVersion: tekton.dev/v1beta1
       kind: PipelineRun
       metadata:
-        name: pipelinerun-$(uid)
+        name: delete-key-$(uid)
       spec:
         pipelineRef:
-            name: pipeline
+            name: delete-key-pipeline
         params:
         - name: api-key
           value: $(params.toolchain-apikey)
@@ -36,7 +37,7 @@ spec:
         - name: vault-name
           value: $(params.vault-name)
         - name: signer
-          value: $(params.validation-signer)
+          value: $(params.signer)
         - name: resource-group
           value: $(params.resource-group)
         - name: registry-namespace
@@ -47,19 +48,39 @@ spec:
 apiVersion: tekton.dev/v1beta1
 kind: TriggerBinding
 metadata:
-  name: key-validate-binding
+  name: key-delete-build-binding
 spec:
   params:
-    - name: validation-signer
+    - name: signer
+      value: $(params.build-signer)
+---
+apiVersion: tekton.dev/v1beta1
+kind: EventListener
+metadata:
+  name: key-delete-build-listener
+spec:
+  triggers:
+    - binding:
+        name: key-delete-build-binding
+      template:
+        name: delete-key
+---
+apiVersion: tekton.dev/v1beta1
+kind: TriggerBinding
+metadata:
+  name: key-delete-validate-binding
+spec:
+  params:
+    - name: signer
       value: $(params.validation-signer)
 ---
 apiVersion: tekton.dev/v1beta1
 kind: EventListener
 metadata:
-  name: key-validate-listener
+  name: key-delete-validate-listener
 spec:
   triggers:
     - binding:
-        name: key-validate-binding
+        name: key-delete-validate-binding
       template:
-        name: create-validate-key
+        name: delete-key
