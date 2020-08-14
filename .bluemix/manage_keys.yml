@@ -19,9 +19,6 @@ stages:
   - type: stage
     enabled: true
   properties:
-  - name: REGISTRY_REGION
-    value: ${REGISTRY_REGION_ID}
-    type: text
   - name: REGISTRY_NAMESPACE
     value: ${REGISTRY_NAMESPACE}
     type: text
@@ -67,9 +64,6 @@ stages:
   - type: stage
     enabled: true
   properties:
-  - name: REGISTRY_REGION
-    value: ${REGISTRY_REGION_ID}
-    type: text
   - name: REGISTRY_NAMESPACE
     value: ${REGISTRY_NAMESPACE}
     type: text
@@ -115,9 +109,6 @@ stages:
   - type: stage
     enabled: false
   properties:
-  - name: REGISTRY_REGION
-    value: ${REGISTRY_REGION_ID}
-    type: text
   - name: REGISTRY_NAMESPACE
     value: ${REGISTRY_NAMESPACE}
     type: text
@@ -161,9 +152,6 @@ stages:
   - type: stage
     enabled: false
   properties:
-  - name: REGISTRY_REGION
-    value: ${REGISTRY_REGION_ID}
-    type: text
   - name: REGISTRY_NAMESPACE
     value: ${REGISTRY_NAMESPACE}
     type: text
