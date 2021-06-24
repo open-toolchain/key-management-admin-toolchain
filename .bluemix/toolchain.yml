@@ -18,6 +18,7 @@ template:
       "[" + $env.branch + "]" +
         "(" + $env.repository +
           "/tree/" + $env.branch + ")"
+    hosted_region: ""
 toolchain:
   name: 'key-setup-{{timestamp}}'
 services:
@@ -38,6 +39,9 @@ services:
           BUILD_SIGNER: '{{form.pipeline.parameters.build_signer}}'
           VALIDATION_SIGNER: '{{form.pipeline.parameters.validation_signer}}'
           REGISTRY_NAMESPACE: '{{form.pipeline.parameters.registry-namespace}}'
+          COMMONS_HOSTED_REGION: >
+            $env.template.info.hosted_region !== "" ? 'https://{{template.info.hosted_region}}.git.cloud.ibm.com/open-toolchain/commons/-/raw/main':
+            'https://raw.githubusercontent.com/open-toolchain/commons/master'
         execute: false
 form:
   pipeline:
